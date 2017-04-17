@@ -21,7 +21,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public static readonly float[] levels = new float[] { 10f, 40f, 80f, 100f };
 
         public int state;
-        public float scared_level = 0f;
+        public float scared_level = 0f; // 0 - 100
+        public GameObject scare_level_UI;
+        private ScareLevel level_slider;
 
         private void Start()
         {
@@ -34,8 +36,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
             state = CURIOUS;
             SetTarget(target);
-        }
+            level_slider = scare_level_UI.GetComponent<ScareLevel>();
 
+            change_scare_level(20f);// DEBUG
+        }
 
         private void Update()
         {
@@ -106,6 +110,12 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public void SetTarget(Transform target)
         {
             this.target = target;
+        }
+
+        public void change_scare_level(float new_scare)
+        {
+            scared_level += new_scare;
+            level_slider.update_scare_level(scared_level / 100); // Normalize 0-100 to 0-1;
         }
     }
 }

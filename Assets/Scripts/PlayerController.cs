@@ -4,28 +4,34 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    public GameObject AI;
+    public UnityStandardAssets.Characters.ThirdPerson.AIController AI_controller;
     public Transform AI_target;
 
-	// Use this for initialization
-	//void Start () {
-		
-	//}
-	
-	// Update is called once per frame
-	//void Update () {
-		
-	//}
+    // Use this for initialization
+    void Start()
+    {
+        AI_controller = AI.GetComponent<UnityStandardAssets.Characters.ThirdPerson.AIController>();
+    }
+
+    // Update is called once per frame
+    //void Update () {
+
+    //}
 
     void OnCollisionEnter(Collision c)
     {
         if (c.gameObject.tag != "Object")
             return;
+        if (c.impulse.x == 0 && c.impulse.y == 0 && c.impulse.z == 0) // Collision too light (relativeVelocity)
+            return;
 
-        //Debug.Log("Collides with object: " + c.impulse.ToString());
-        //AI_target.position = new Vector3(c.gameObject.transform.position.x, AI_target.position.y, c.gameObject.transform.position.y);
-        //Debug.Log(c.gameObject.transform.position);
+        float scare_factor = c.relativeVelocity.magnitude;
+        AI_controller.change_scare_level(scare_factor);
+        Debug.Log("Collides with " + c.gameObject.name + scare_factor.ToString());
+
+
         AI_target.SetParent(c.gameObject.transform);
         AI_target.transform.localPosition = new Vector3();
-
     }
 }

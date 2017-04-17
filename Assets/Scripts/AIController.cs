@@ -11,6 +11,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public UnityEngine.AI.NavMeshAgent agent { get; private set; }             // the navmesh agent required for the path finding
         public ThirdPersonCharacter character { get; private set; } // the character we are controlling
         public Transform target;                                    // target to aim for
+        //public Transform new_target;
+
+        public Transform[] targets;
 
         // States
         public static readonly int IDLE = 0;
@@ -34,11 +37,11 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 	        agent.updateRotation = false;
 	        agent.updatePosition = true;
 
-            state = CURIOUS;
-            SetTarget(target);
+            state = IDLE;
             level_slider = scare_level_UI.GetComponent<ScareLevel>();
 
-            change_scare_level(20f);// DEBUG
+            //change_scare_level(20f);// DEBUG
+            agent.SetDestination(targets[0].position);
         }
 
         private void Update()
@@ -65,8 +68,14 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             if (scared_level > levels[IDLE])
             {
                 state = CURIOUS;
+                agent.SetDestination(target.position);
                 return;
             }
+
+            if (agent.remainingDistance > agent.stoppingDistance)
+                character.Move(agent.desiredVelocity, false, false);
+            else
+                character.Move(Vector3.zero, false, false);
         }
 
         public void curious_state()
@@ -76,8 +85,8 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 state = SCARED;
                 return;
             }
-
             // Running towards sound source
+
             if (target != null)
                 agent.SetDestination(target.position);
 
@@ -115,7 +124,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public void change_scare_level(float new_scare)
         {
             scared_level += new_scare;
-            level_slider.update_scare_level(scared_level / 100); // Normalize 0-100 to 0-1;
+            level_slider.update_scare_level(Mathf.Floor(scared_level) / 100); // Normalize 0-100 to 0-1;
         }
     }
 }

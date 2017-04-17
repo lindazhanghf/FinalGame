@@ -15,8 +15,8 @@ public class FlyCamera : MonoBehaviour
     space : Moves camera on X and Z axis only.  So camera doesn't gain any height*/
 
     public float mainSpeed = 15f; //100.0f; //regular speed
-    float shiftAdd = 0f; //250.0f; //multiplied by how long shift is held.  Basically running
-    float maxShift = 0f; //1000.0f; //Maximum speed when holdin gshift
+    //float shiftAdd = 0f; //250.0f; //multiplied by how long shift is held.  Basically running
+    //float maxShift = 0f; //1000.0f; //Maximum speed when holdin gshift
     public float camSens = 0.2f; //0.25f; //How sensitive it with mouse
     private Vector3 lastMouse = new Vector3(255, 255, 255); //kind of in the middle of the screen, rather than at the top (play)
     private float totalRun = 1.0f;
@@ -82,7 +82,7 @@ public class FlyCamera : MonoBehaviour
         if (Mathf.Abs(Time.timeScale) < float.Epsilon) return;
 
         // get the rotation before it's changed
-        float oldYRotation = transform.eulerAngles.y;
+        //float oldYRotation = transform.eulerAngles.y;
 
         //mouseLook.LookRotation(transform, cam.transform);
 

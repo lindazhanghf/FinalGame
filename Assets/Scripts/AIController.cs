@@ -40,7 +40,6 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             state = IDLE;
             level_slider = scare_level_UI.GetComponent<ScareLevel>();
 
-            //change_scare_level(20f);// DEBUG
             agent.SetDestination(targets[0].position);
         }
 
@@ -78,6 +77,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 character.Move(Vector3.zero, false, false);
         }
 
+        // Running towards objects
         public void curious_state()
         {
             if (scared_level > levels[CURIOUS])
@@ -85,18 +85,17 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 state = SCARED;
                 return;
             }
-            // Running towards sound source
 
             if (target != null)
                 agent.SetDestination(target.position);
-
+            Debug.Log(agent.remainingDistance);
             if (agent.remainingDistance > agent.stoppingDistance)
                 character.Move(agent.desiredVelocity, false, false);
             else
                 character.Move(Vector3.zero, false, false);
-
         }
 
+        // Running away from objects
         public void scared_state()
         {
             if (scared_level > levels[SCARED])
@@ -104,8 +103,16 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 state = RUNNING;
             }
 
+            if (target != null)
+                agent.SetDestination(target.position);
+            if (agent.remainingDistance < 10 - agent.stoppingDistance)
+                character.Move(-1 * agent.desiredVelocity, false, false);
+            else
+                character.Move(Vector3.zero, false, false);
+
         }
 
+        // Running around the house scared
         public void running_state()
         {
             if (scared_level > levels[RUNNING])
@@ -116,12 +123,37 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
         }
 
-        public void SetTarget(Transform target)
+        void OnCollisionEnter(Collision c)
         {
-            this.target = target;
+            switch (state)
+            {
+                case 0:
+                    collision_scared(c);
+                    break;
+                //case 1:
+                //    curious_state();
+                //    break;
+                //case 2:
+                //    scared_state();
+                //    break;
+                //case 3:
+                //    running_state();
+                //    break;
+            }
         }
 
-        public void change_scare_level(float new_scare)
+        public void collision_scared(Collision c)
+        {
+            if (c.gameObject.tag != "Object")
+                return;
+            if (c.impulse.x == 0 && c.impulse.y == 0 && c.impulse.z == 0) // Collision too light (relativeVelocity)
+                return;
+            float scare_factor = c.relativeVelocity.magnitude;
+            change_scare_level(scare_factor);
+            Debug.Log("collides with " + c.gameObject.name + scare_factor.ToString());
+        }
+
+        void change_scare_level(float new_scare)
         {
             scared_level += new_scare;
             level_slider.update_scare_level(Mathf.Floor(scared_level) / 100); // Normalize 0-100 to 0-1;

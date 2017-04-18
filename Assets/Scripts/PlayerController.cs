@@ -21,15 +21,16 @@ public class PlayerController : MonoBehaviour {
 
     void OnCollisionEnter(Collision c)
     {
-        if (c.gameObject.tag != "Object")
-            return;
-        if (c.impulse.x == 0 && c.impulse.y == 0 && c.impulse.z == 0) // Collision too light (relativeVelocity)
-            return;
+        //if (c.gameObject.tag != "Object")
+        //    return;
+        //if (c.impulse.x == 0 && c.impulse.y == 0 && c.impulse.z == 0) // Collision too light (relativeVelocity)
+        //    return;
 
-        float scare_factor = c.relativeVelocity.magnitude;
-        AI_controller.change_scare_level(scare_factor);
-        Debug.Log("Collides with " + c.gameObject.name + scare_factor.ToString());
-
+        //float scare_factor = c.relativeVelocity.magnitude;
+        //AI_controller.change_scare_level(scare_factor);
+        //Debug.Log("Collides with " + c.gameObject.name + scare_factor.ToString());
+        Debug.Log("Player");
+        AI_controller.collision_scared(c);
 
         AI_target.SetParent(c.gameObject.transform);
         AI_target.transform.localPosition = new Vector3();

@@ -17,11 +17,11 @@ public class ScareLevel : MonoBehaviour {
     }
     // Update is called once per frame
     void Update () {
-	    if (self.value < scare_level)
+        if (self.value + 0.001 < scare_level)
         {
             self.value += speed_rise;
         }
-        else if (self.value > scare_level)
+        else if (self.value - 0.001 > scare_level)
         {
             self.value -= speed_drop;
         }
@@ -29,7 +29,7 @@ public class ScareLevel : MonoBehaviour {
 
     public void update_scare_level(float new_scare_level)
     {
-        //Debug.Log(new_scare_level);
+        Debug.Log(new_scare_level);
         scare_level = new_scare_level;
     }
 }

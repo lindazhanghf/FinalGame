@@ -21,7 +21,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
         public static readonly float[] levels = new float[] { 10f, 40f, 80f, 100f };
 
-        public int state = IDLE;
+        public int state = SCARED;
         public float scared_level = 0f; // 0 - 100
         public GameObject scare_level_UI;
         private ScareLevel level_slider;
@@ -155,22 +155,22 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
         void OnCollisionEnter(Collision c)
         {
-            collision_scared(c);
-            //switch (state)
-            //{
-            //    case 0:
-            //        collision_scared(c);
-            //        break;
-            //    //case 1:
-            //    //    curious_state();
-            //    //    break;
-            //    //case 2:
-            //    //    scared_state();
-            //    //    break;
-            //    //case 3:
-            //    //    running_state();
-            //    //    break;
-            //}
+            //collision_scared(c);
+            switch (state)
+            {
+                case 0:
+                    collision_scared(c);
+                    break;
+                    //case 1:
+                    //    curious_state();
+                    //    break;
+                    //case 2:
+                    //    scared_state();
+                    //    break;
+                    //case 3:
+                    //    running_state();
+                    //    break;
+            }
         }
 
         private System.Random rand = new System.Random();

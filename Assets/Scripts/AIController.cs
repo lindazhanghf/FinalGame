@@ -18,13 +18,15 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         static readonly int SCARED = 2;
         static readonly int RUNNING = 3;
         static readonly int EXIT = 4;
-
+        // Game states & scare level
         public static readonly float[] levels = new float[] { 10f, 40f, 80f, 100f };
-
         public int state = SCARED;
         public float scared_level = 0f; // 0 - 100
         public GameObject scare_level_UI;
         private ScareLevel level_slider;
+
+        private AudioSource audio_source;
+        public AudioClip[] audio_clips;
         public GameObject door_opener;
 
         private void Start()
@@ -37,6 +39,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 	        agent.updatePosition = true;
 
             level_slider = scare_level_UI.GetComponent<ScareLevel>();
+            audio_source = GetComponent<AudioSource>();
 
             agent.SetDestination(targets[0].position);
         }
@@ -59,8 +62,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                     break;
                 case 4:
                     exit_state();
-                    break;
+                    return;
             }
+            change_scare_level(-0.01f);
         }
 
         public void idle_state()
@@ -69,6 +73,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             {
                 state = CURIOUS;
                 agent.SetDestination(target.position);
+                audio_source.clip = audio_clips[state];
                 return;
             }
 
@@ -84,13 +89,16 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             if (scared_level > levels[CURIOUS])
             {
                 state = SCARED;
+                audio_source.clip = audio_clips[state];
                 return;
             }
 
             if (target != null)
                 agent.SetDestination(target.position);
             if (agent.remainingDistance > agent.stoppingDistance)
+            {
                 character.Move(agent.desiredVelocity, false, false);
+            }
             else
                 character.Move(Vector3.zero, false, false);
         }
@@ -101,12 +109,19 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             if (scared_level > levels[SCARED])
             {
                 state = RUNNING;
+                audio_source.clip = audio_clips[state];
+                audio_source.loop = true;
+                audio_source.Play();
+                //return;
             }
 
             if (target != null)
                 agent.SetDestination(target.position);
             if (agent.remainingDistance < 10 - agent.stoppingDistance)
+            {
                 character.Move(-1 * agent.desiredVelocity, false, false);
+                play_audio();
+            }
             else
                 character.Move(Vector3.zero, false, false);
 
@@ -134,6 +149,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             {
                 agent.SetDestination(new Vector3(-11, 2, 35));
                 state = EXIT;
+                audio_source.clip = audio_clips[state];
+                audio_source.loop = false;
+                audio_source.Play();
                 return;
             }
 
@@ -152,14 +170,24 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 character.Move(Vector3.zero, false, false);  // TODO Level ends
         }
 
+        public void play_audio()
+        {
+            if (!audio_source.isPlaying)
+                audio_source.Play();
+        }
+
 
         void OnCollisionEnter(Collision c)
         {
+            if (c.transform.tag != "Object")
+                return;
+
             //collision_scared(c);
             switch (state)
             {
                 case 0:
                     collision_scared(c);
+                    audio_source.Play();
                     break;
                     //case 1:
                     //    curious_state();

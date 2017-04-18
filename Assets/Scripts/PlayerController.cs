@@ -31,6 +31,7 @@ public class PlayerController : MonoBehaviour {
         //Debug.Log("Collides with " + c.gameObject.name + scare_factor.ToString());
         Debug.Log("Player collides");
         AI_controller.collision_scared(c);
+        AI_controller.play_audio();
 
         AI_target.SetParent(c.gameObject.transform);
         AI_target.transform.localPosition = new Vector3();

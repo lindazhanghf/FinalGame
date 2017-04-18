@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-//using System.Collections;
 
 namespace UnityStandardAssets.Characters.ThirdPerson
 {
@@ -11,22 +10,22 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public UnityEngine.AI.NavMeshAgent agent { get; private set; }             // the navmesh agent required for the path finding
         public ThirdPersonCharacter character { get; private set; } // the character we are controlling
         public Transform target;                                    // target to aim for
-        //public Transform new_target;
-
         public Transform[] targets;
 
         // States
-        public static readonly int IDLE = 0;
-        public static readonly int CURIOUS = 1;
-        public static readonly int SCARED = 2;
-        public static readonly int RUNNING = 3;
+        static readonly int IDLE = 0;
+        static readonly int CURIOUS = 1;
+        static readonly int SCARED = 2;
+        static readonly int RUNNING = 3;
+        static readonly int EXIT = 4;
 
         public static readonly float[] levels = new float[] { 10f, 40f, 80f, 100f };
 
-        public int state;
+        public int state = IDLE;
         public float scared_level = 0f; // 0 - 100
         public GameObject scare_level_UI;
         private ScareLevel level_slider;
+        public GameObject door_opener;
 
         private void Start()
         {
@@ -37,7 +36,6 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 	        agent.updateRotation = false;
 	        agent.updatePosition = true;
 
-            state = IDLE;
             level_slider = scare_level_UI.GetComponent<ScareLevel>();
 
             agent.SetDestination(targets[0].position);
@@ -58,6 +56,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                     break;
                 case 3:
                     running_state();
+                    break;
+                case 4:
+                    exit_state();
                     break;
             }
         }
@@ -88,7 +89,6 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
             if (target != null)
                 agent.SetDestination(target.position);
-            Debug.Log(agent.remainingDistance);
             if (agent.remainingDistance > agent.stoppingDistance)
                 character.Move(agent.desiredVelocity, false, false);
             else
@@ -115,31 +115,71 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         // Running around the house scared
         public void running_state()
         {
-            if (scared_level > levels[RUNNING])
+            if (scared_level > levels[RUNNING]) // Scare_level reaches MAX
             {
-                // TODO run out of the house
+                door_opener.SetActive(true);
+                agent.SetDestination(targets[targets.Length - 1].position); // Door
+                //return;
+            }
+            //if (target != null)
+            //    agent.SetDestination(target.position);
+            if (agent.remainingDistance > agent.stoppingDistance)
+            {
+                character.Move(agent.desiredVelocity, false, false);
+                return;
+            }
+            // else: Reached target
+
+            if (scared_level > levels[RUNNING]) // Reach door
+            {
+                agent.SetDestination(new Vector3(-11, 2, 35));
+                state = EXIT;
                 return;
             }
 
+            // Select new random target
+            random_target();
         }
+
+        // run out of the house
+        public void exit_state()
+        {
+            //if (target != null)
+            //    agent.SetDestination(new Vector3(-11, 2, 35));
+            if (agent.remainingDistance > agent.stoppingDistance)
+                character.Move(agent.desiredVelocity, false, false);
+            else
+                character.Move(Vector3.zero, false, false);  // TODO Level ends
+        }
+
 
         void OnCollisionEnter(Collision c)
         {
-            switch (state)
-            {
-                case 0:
-                    collision_scared(c);
-                    break;
-                //case 1:
-                //    curious_state();
-                //    break;
-                //case 2:
-                //    scared_state();
-                //    break;
-                //case 3:
-                //    running_state();
-                //    break;
-            }
+            collision_scared(c);
+            //switch (state)
+            //{
+            //    case 0:
+            //        collision_scared(c);
+            //        break;
+            //    //case 1:
+            //    //    curious_state();
+            //    //    break;
+            //    //case 2:
+            //    //    scared_state();
+            //    //    break;
+            //    //case 3:
+            //    //    running_state();
+            //    //    break;
+            //}
+        }
+
+        private System.Random rand = new System.Random();
+        void random_target(Transform t=null)
+        {
+            if (t == null) 
+                t = targets[rand.Next(targets.Length)];
+            target = t;
+            agent.SetDestination(target.position);
         }
 
         public void collision_scared(Collision c)
@@ -150,7 +190,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 return;
             float scare_factor = c.relativeVelocity.magnitude;
             change_scare_level(scare_factor);
-            Debug.Log("collides with " + c.gameObject.name + scare_factor.ToString());
+            Debug.Log(c.transform.parent.name + " " + scare_factor.ToString());
         }
 
         void change_scare_level(float new_scare)

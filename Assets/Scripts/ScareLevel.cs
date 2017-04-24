@@ -29,7 +29,7 @@ public class ScareLevel : MonoBehaviour {
 
     public void update_scare_level(float new_scare_level)
     {
-        Debug.Log(new_scare_level);
+        //Debug.Log(new_scare_level);
         scare_level = new_scare_level;
     }
 }

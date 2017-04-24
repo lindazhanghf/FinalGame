@@ -7,10 +7,12 @@ namespace UnityStandardAssets.Characters.ThirdPerson
     [RequireComponent(typeof (ThirdPersonCharacter))]
     public class AIController : MonoBehaviour
     {
-        public UnityEngine.AI.NavMeshAgent agent { get; private set; }             // the navmesh agent required for the path finding
-        public ThirdPersonCharacter character { get; private set; } // the character we are controlling
-        public Transform target;                                    // target to aim for
+        public UnityEngine.AI.NavMeshAgent agent { get; private set; }      // the navmesh agent required for the path finding
+        public ThirdPersonCharacter character { get; private set; }         // the character we are controlling
+        public Transform target;                                            // target to aim for
         public Transform[] targets;
+
+        private FloatObject floatingObject;
 
         // States
         static readonly int IDLE = 0;
@@ -29,6 +31,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
         public AudioClip[] audio_clips;
         public GameObject door_opener;
 
+        public float counter = 5f;
         private void Start()
         {
             // get the components on the object we need ( should not be null due to require component so no need to check )
@@ -38,6 +41,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 	        agent.updateRotation = false;
 	        agent.updatePosition = true;
 
+            floatingObject = GameObject.Find("Player").GetComponent<FloatObject>();
             level_slider = scare_level_UI.GetComponent<ScareLevel>();
             audio_source = GetComponent<AudioSource>();
 
@@ -46,7 +50,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
         private void Update()
         {
-            switch(state)
+            switch (state)
             {
                 case 0:
                     idle_state();
@@ -64,7 +68,9 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                     exit_state();
                     return;
             }
-            change_scare_level(-0.01f);
+            //change_scare_level(-0.01f);
+            if (counter < 2)
+                counter += Time.deltaTime;
         }
 
         public void idle_state()
@@ -95,7 +101,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
             if (target != null)
                 agent.SetDestination(target.position);
-            if (agent.remainingDistance > agent.stoppingDistance)
+            if (agent.remainingDistance > agent.stoppingDistance - 1)
             {
                 character.Move(agent.desiredVelocity, false, false);
             }
@@ -117,10 +123,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
             if (target != null)
                 agent.SetDestination(target.position);
-            if (agent.remainingDistance < 10 - agent.stoppingDistance)
+            if (agent.remainingDistance < 8 - agent.stoppingDistance)
             {
                 character.Move(-1 * agent.desiredVelocity, false, false);
-                play_audio();
+                //play_audio();
             }
             else
                 character.Move(Vector3.zero, false, false);
@@ -176,29 +182,43 @@ namespace UnityStandardAssets.Characters.ThirdPerson
                 audio_source.Play();
         }
 
-
-        void OnCollisionEnter(Collision c)
+        void OnTriggerEnter(Collider c)
         {
-            if (c.transform.tag != "Object")
+                
+            if (counter < 2 || c.gameObject != floatingObject.carriedObject)
                 return;
 
-            //collision_scared(c);
-            switch (state)
-            {
-                case 0:
-                    collision_scared(c);
-                    audio_source.Play();
-                    break;
-                    //case 1:
-                    //    curious_state();
-                    //    break;
-                    //case 2:
-                    //    scared_state();
-                    //    break;
-                    //case 3:
-                    //    running_state();
-                    //    break;
-            }
+            counter = 0f;
+            Debug.Log("Enter " + c.gameObject.name);
+
+            change_scare_level(5);
+            if (state == 3)
+                return;
+            play_audio();
+
+            //if (c.transform.tag != "Object")
+            //    return;
+            //collision_scared(c, 0.1f);
+            //if (state == 3)
+            //    return;
+            //play_audio();
+            //switch (state)
+            //{
+            //    case 0:
+            //        collision_scared(c, 0.1f);
+            //        play_audio();
+            //        break;
+            //    case 1:
+            //        //collision_scared(c, 0.1f);
+            //        play_audio();
+            //        break;
+            //        //case 2:
+            //        //    scared_state();
+            //        //    break;
+            //        //case 3:
+            //        //    running_state();
+            //        //    break;
+            //}
         }
 
         private System.Random rand = new System.Random();
@@ -210,13 +230,13 @@ namespace UnityStandardAssets.Characters.ThirdPerson
             agent.SetDestination(target.position);
         }
 
-        public void collision_scared(Collision c)
+        public void collision_scared(Collision c, float scale = 1)
         {
             if (c.gameObject.tag != "Object")
                 return;
             if (c.impulse.x == 0 && c.impulse.y == 0 && c.impulse.z == 0) // Collision too light (relativeVelocity)
                 return;
-            float scare_factor = c.relativeVelocity.magnitude;
+            float scare_factor = c.relativeVelocity.magnitude * scale;
             change_scare_level(scare_factor);
             Debug.Log(c.transform.parent.name + " " + scare_factor.ToString());
         }

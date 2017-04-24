@@ -19,21 +19,21 @@ public class PlayerController : MonoBehaviour {
 
     //}
 
-    void OnCollisionEnter(Collision c)
-    {
-        if (c.gameObject.tag != "Object")
-            return;
-        //if (c.impulse.x == 0 && c.impulse.y == 0 && c.impulse.z == 0) // Collision too light (relativeVelocity)
-        //    return;
+    //void OnCollisionEnter(Collision c)
+    //{
+    //    if (c.gameObject.tag != "Object")
+    //        return;
+    //    //if (c.impulse.x == 0 && c.impulse.y == 0 && c.impulse.z == 0) // Collision too light (relativeVelocity)
+    //    //    return;
 
-        //float scare_factor = c.relativeVelocity.magnitude;
-        //AI_controller.change_scare_level(scare_factor);
-        //Debug.Log("Collides with " + c.gameObject.name + scare_factor.ToString());
-        Debug.Log("Player collides");
-        AI_controller.collision_scared(c);
-        AI_controller.play_audio();
+    //    //float scare_factor = c.relativeVelocity.magnitude;
+    //    //AI_controller.change_scare_level(scare_factor);
+    //    //Debug.Log("Collides with " + c.gameObject.name + scare_factor.ToString());
+    //    Debug.Log("Player collides");
+    //    AI_controller.collision_scared(c);
+    //    AI_controller.play_audio();
 
-        AI_target.SetParent(c.gameObject.transform);
-        AI_target.transform.localPosition = new Vector3();
-    }
+    //    AI_target.SetParent(c.gameObject.transform);
+    //    AI_target.transform.localPosition = new Vector3();
+    //}
 }

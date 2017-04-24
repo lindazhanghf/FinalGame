@@ -6,17 +6,17 @@ public class FloatObject : MonoBehaviour
 {
     //GameObject mainCamera;
     public Camera mainCamera;
-    bool carrying;
-    GameObject carriedObject;
+    public GameObject carriedObject;
     public float distance;
     public float smooth;
+    bool carrying;
 
     // Use this for initialization
-    void Start()
-    {
-        //mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
-        //mainCamera = Camera.main;
-    }
+    //void Start()
+    //{
+    //    //mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+    //    //mainCamera = Camera.main;
+    //}
 
     // Update is called once per frame
     void FixedUpdate()
